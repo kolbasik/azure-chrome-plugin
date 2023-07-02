@@ -1,21 +1,30 @@
+const getVisibleElements = (selector) =>
+  [...document.querySelectorAll(selector)]
+  .filter(it => it.checkVisibility())
+
 const loadValues = ({interval=500, timeout=20000} = {}) => {
   return new Promise(resolve => {
-    let timer = null, stop = () => resolve(clearInterval(timer));
+    let timer = null, stop = () => resolve(clearInterval(timer))
 
     timer = setInterval(() => {
-      $loadMore = document.querySelector(".azc-grid-pageable-loadMoreContainer");
-      if ($loadMore && !$loadMore.classList.contains("fxs-display-none")) {
-        $loadMore?.click();
-      } else {
-        stop();
-      }
-    }, interval);
+      var $loadMores = getVisibleElements(".azc-grid-pageable-loadMoreContainer")
 
-    setTimeout(stop, timeout);
+      for (let $loadMore of $loadMores) {
+        if (!$loadMore.classList.contains("fxs-display-none")) {
+          $loadMore?.click()
+          return
+        }
+      }
+
+      stop();
+    }, interval)
+
+    setTimeout(stop, timeout)
   });
 };
 
-const getValueRows = () => [...document.querySelectorAll(".azc-grid-full > tbody > tr")];
+const getValueRows = () =>
+  getVisibleElements(".azc-grid-full").flatMap(it => [...it.querySelectorAll("tbody > tr")])
 
 const filterValues = (term) => {
   return getValueRows().filter((tr) => {
@@ -49,7 +58,7 @@ document.body.addEventListener("keyup", ev => {
         break;
       }
       case "Z": {
-        filterValues('');
+        resetFilter();
         break;
       }
       case "Q": {
@@ -59,4 +68,4 @@ document.body.addEventListener("keyup", ev => {
       }
     }
   }
-})
+});
