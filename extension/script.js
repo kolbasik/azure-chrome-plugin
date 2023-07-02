@@ -2,7 +2,7 @@ const getVisibleElements = (selector) =>
   [...document.querySelectorAll(selector)]
   .filter(it => it.checkVisibility())
 
-const loadValues = ({interval=500, timeout=20000} = {}) => {
+const loadValues = ({interval=250, timeout=30000} = {}) => {
   return new Promise(resolve => {
     let timer = null, stop = () => resolve(clearInterval(timer))
 
@@ -45,27 +45,30 @@ const loadAndFilterValues = async (term) => {
   filterValues(term);
 };
 
+const actions = {
+  "Q": function LoadAndFilterRows() {
+    const term = prompt("Term?");
+    term && loadAndFilterValues(term);
+  },
+  "L": function LoadRows() {
+    loadValues();
+  },
+  "F": function FilterRows() {
+    const term = prompt("Term?");
+    term && filterValues(term);
+  },
+  "Z": function ResetRows() {
+    resetFilter();
+  }
+}
+
 document.body.addEventListener("keyup", ev => {
-  if (ev.ctrlKey && ev.shiftKey) {
-    switch(ev.key) {
-      case "L": {
-        loadValues();
-        break;
-      }
-      case "F": {
-        const term = prompt("Term?");
-        term && filterValues(term);
-        break;
-      }
-      case "Z": {
-        resetFilter();
-        break;
-      }
-      case "Q": {
-        const term = prompt("Term?");
-        term && loadAndFilterValues(term);
-        break;
-      }
+  if (ev.ctrlKey) {
+    if (ev.key === '/') {
+      alert(Object.entries(actions).map(it => `Ctrl + Shift + ${it[0]} : ${it[1].name.replace(/([A-Z])/g, ' $1').trim()}`).join('\n'))
+    } else if (ev.shiftKey) {
+      const action = actions[ev.key]
+      action && action()
     }
   }
 });
